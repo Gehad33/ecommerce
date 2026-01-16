@@ -1,0 +1,134 @@
+/* إضافة خلفيات متحركة */
+.animated-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.animated-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, 
+    rgba(102, 126, 234, 0.1) 0%, 
+    rgba(118, 75, 162, 0.1) 25%, 
+    rgba(102, 126, 234, 0.1) 50%, 
+    rgba(118, 75, 162, 0.1) 75%, 
+    rgba(102, 126, 234, 0.1) 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  z-index: -1;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* تأثيرات دخول */
+.fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.8s ease-out;
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.8s ease-out;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+/* إضافة تأثيرات للبحث */
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+.hover-bg-light:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* تأثيرات الانتقال للبحث */
+.search-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+/* تأثيرات الظهور للنتائج */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-results {
+  animation: slideDown 0.3s ease-out;
+}
+
+/* تأثيرات الفلتر */
+.sticky-filter {
+  position: sticky;
+  top: 100px;
+  transition: top 0.3s ease;
+}
+
+/* تأثيرات البطاقات في البحث */
+.search-result-card {
+  transition: all 0.2s ease;
+}
+
+.search-result-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+/* في src/index.css أضف هذه الأنماط */
+.search-results-dropdown {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* تحسينات للبحث */
+.search-highlight {
+  background-color: #fff3cd;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* تأثيرات hover */
+.hover-lift {
+  transition: transform 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
