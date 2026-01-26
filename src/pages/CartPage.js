@@ -1,13 +1,15 @@
 import React from 'react';
 import { Container, Row, Col, Button, Card, Table, Form, Alert } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { removeFromCart, updateQuantity, clearCart } from '../features/cart/cartSlice';
 import toast from 'react-hot-toast';
 
 const CartPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
+  const { user } = useSelector((state) => state.auth);
 
   const subtotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
@@ -32,6 +34,29 @@ const CartPage = () => {
   const handleClearCart = () => {
     dispatch(clearCart());
     toast('Cart cleared', { icon: '🗑️' });
+  };
+
+  const handleCheckout = () => {
+    if (!user) {
+      toast.error('Please login to proceed to checkout', {
+        icon: '🔒',
+        duration: 3000,
+      });
+      navigate('/login', { 
+        state: { 
+          message: 'Please login to proceed to checkout',
+          returnUrl: '/cart'
+        } 
+      });
+      return;
+    }
+    
+    if (cartItems.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+    
+    navigate('/checkout');
   };
 
   if (cartItems.length === 0) {
@@ -192,18 +217,55 @@ const CartPage = () => {
                   </Alert>
                 )}
 
+                {!user && (
+                  <Alert variant="warning" className="mb-3">
+                    <div className="d-flex align-items-center">
+                      <span className="me-2">🔒</span>
+                      <div>
+                        <strong>Login required to checkout</strong>
+                        <p className="mb-0">Please sign in to complete your purchase</p>
+                      </div>
+                    </div>
+                  </Alert>
+                )}
+
                 <Button
-                  variant="primary"
+                  variant={user ? "primary" : "warning"}
                   size="lg"
                   className="w-100 mb-2"
-                  onClick={() => toast.success('Proceeding to checkout!')}
+                  onClick={handleCheckout}
+                  disabled={!user}
                 >
-                  Proceed to Checkout
+                  {user ? 'Proceed to Checkout' : '🔒 Login to Checkout'}
                 </Button>
                 
                 <Link to="/products" className="btn btn-outline-secondary w-100">
                   Continue Shopping
                 </Link>
+
+                {!user && (
+                  <div className="mt-3">
+                    <p className="text-center mb-2">Don't have an account?</p>
+                    <div className="d-flex gap-2">
+                      <Button 
+                        as={Link} 
+                        to="/login" 
+                        variant="outline-primary" 
+                        className="w-50"
+                      >
+                        Sign In
+                      </Button>
+                      <Button 
+                        as={Link} 
+                        to="/register" 
+                        variant="primary" 
+                        className="w-50"
+                      >
+                        Sign Up
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             </Card.Body>
           </Card>

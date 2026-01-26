@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Navbar, Nav, Container, Badge, Form, Button, Dropdown, Card } from 'react-bootstrap';
+import { Navbar, Nav, Container, Badge, Form, Button, Card, Dropdown } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSearchQuery, setFilteredProducts } from '../features/products/productsSlice';
+import { setSearchQuery, setFilteredProducts, clearSearch } from '../features/products/productsSlice';
+import { logout } from '../features/auth/authSlice';
 
 const NavigationBar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
   const { items: products, searchQuery } = useSelector((state) => state.products);
+  const { user } = useSelector((state) => state.auth);
   
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const [query, setQuery] = useState(searchQuery || '');
@@ -32,6 +34,7 @@ const NavigationBar = () => {
   useEffect(() => {
     if (query.trim() === '') {
       setLocalFilteredProducts([]);
+      dispatch(setFilteredProducts([]));
       return;
     }
 
@@ -57,7 +60,7 @@ const NavigationBar = () => {
 
   const handleClearSearch = () => {
     setQuery('');
-    dispatch(setSearchQuery(''));
+    dispatch(clearSearch());
     setLocalFilteredProducts([]);
     setShowResults(false);
   };
@@ -85,6 +88,19 @@ const NavigationBar = () => {
     navigate('/products?sort=rating');
   };
 
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
+
+  const handleAddToCartClick = () => {
+    if (!user) {
+      navigate('/login', { state: { message: 'Please login to add items to cart' } });
+      return;
+    }
+    navigate('/cart');
+  };
+
   return (
     <Navbar bg="dark" variant="dark" expand="lg" sticky="top" className="shadow-lg">
       <Container>
@@ -102,17 +118,17 @@ const NavigationBar = () => {
             <Nav.Link as={Link} to="/products" className="mx-3 fw-bold">
               🛍️ Products
             </Nav.Link>
-            <Nav.Link onClick={handleDealsClick} className="mx-3 fw-bold cursor-pointer">
+            <Nav.Link onClick={handleDealsClick} className="mx-3 fw-bold" style={{ cursor: 'pointer' }}>
               🔥 Deals
             </Nav.Link>
-            <Nav.Link onClick={handleBestSellersClick} className="mx-3 fw-bold cursor-pointer">
+            <Nav.Link onClick={handleBestSellersClick} className="mx-3 fw-bold" style={{ cursor: 'pointer' }}>
               ⭐ Best Sellers
             </Nav.Link>
           </Nav>
           
           <div className="d-flex align-items-center">
             {/* شريط البحث */}
-            <div className="position-relative me-3" ref={searchRef}>
+            <div className="position-relative me-3" ref={searchRef} style={{ minWidth: '300px' }}>
               <Form onSubmit={handleSearch} className="d-flex">
                 <div className="position-relative flex-grow-1">
                   <Form.Control
@@ -126,7 +142,7 @@ const NavigationBar = () => {
                     }}
                     onFocus={() => setShowResults(true)}
                     onKeyDown={handleKeyDown}
-                    style={{ minWidth: '250px' }}
+                    style={{ width: '100%' }}
                   />
                   {query && (
                     <Button
@@ -161,7 +177,7 @@ const NavigationBar = () => {
                     zIndex: 1050,
                     maxHeight: '400px',
                     overflowY: 'auto',
-                    animation: 'slideDown 0.3s ease-out'
+                    top: '100%'
                   }}>
                   <Card.Body className="p-0">
                     <div className="p-3 border-bottom bg-light">
@@ -173,8 +189,9 @@ const NavigationBar = () => {
                           variant="link" 
                           size="sm" 
                           className="p-0 text-primary"
-                          onClick={() => {
-                            handleSearch({ preventDefault: () => {} });
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleSearch(e);
                           }}
                         >
                           View all results →
@@ -185,9 +202,14 @@ const NavigationBar = () => {
                     {filteredProducts.map((product) => (
                       <div 
                         key={product.id}
-                        className="p-3 border-bottom hover-bg-light cursor-pointer search-result-card"
+                        className="p-3 border-bottom"
                         onClick={() => handleProductClick(product)}
-                        style={{ cursor: 'pointer' }}
+                        style={{ 
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
                         <div className="d-flex align-items-center">
                           <img
@@ -198,18 +220,19 @@ const NavigationBar = () => {
                               width: '50px', 
                               height: '50px', 
                               objectFit: 'contain',
-                              backgroundColor: '#f8f9fa'
+                              backgroundColor: '#f8f9fa',
+                              padding: '5px'
                             }}
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = "https://via.placeholder.com/50x50?text=Product";
+                              e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Crect width='50' height='50' fill='%23f8f9fa'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='10' fill='%236c757d'%3EImage%3C/text%3E%3C/svg%3E";
                             }}
                           />
                           <div className="flex-grow-1">
-                            <div className="d-flex justify-content-between">
-                              <h6 className="mb-1" style={{ maxWidth: '250px' }}>
-                                {product.title.length > 40 
-                                  ? `${product.title.substring(0, 40)}...` 
+                            <div className="d-flex justify-content-between align-items-start">
+                              <h6 className="mb-1" style={{ maxWidth: '200px' }}>
+                                {product.title.length > 30 
+                                  ? `${product.title.substring(0, 30)}...` 
                                   : product.title}
                               </h6>
                               <Badge bg="warning" text="dark" className="ms-2">
@@ -217,9 +240,9 @@ const NavigationBar = () => {
                               </Badge>
                             </div>
                             <div className="d-flex align-items-center">
-                              <Badge bg="info" className="me-2">
+                              <span className="badge bg-info me-2">
                                 {product.category}
-                              </Badge>
+                              </span>
                               <small className="text-muted">
                                 ⭐ {product.rating?.rate || 4.5}
                               </small>
@@ -237,7 +260,7 @@ const NavigationBar = () => {
                 <Card className="position-absolute start-0 end-0 mt-2 shadow-sm border-0"
                   style={{ 
                     zIndex: 1050,
-                    animation: 'slideDown 0.3s ease-out'
+                    top: '100%'
                   }}>
                   <Card.Body className="text-center py-4">
                     <div className="display-4 mb-3">🔍</div>
@@ -253,8 +276,8 @@ const NavigationBar = () => {
             {/* زر السلة */}
             <Button 
               variant="outline-light" 
-              className="position-relative rounded-pill"
-              onClick={() => navigate('/cart')}
+              className="position-relative me-3 rounded-pill"
+              onClick={handleAddToCartClick}
             >
               🛒 Cart
               {cartCount > 0 && (
@@ -267,35 +290,57 @@ const NavigationBar = () => {
                 </Badge>
               )}
             </Button>
+            
+            {/* أزرار تسجيل الدخول/تسجيل الخروج - تظهر دائماً */}
+            {user ? (
+              <Dropdown>
+                <Dropdown.Toggle 
+                  variant="outline-light" 
+                  className="rounded-pill"
+                  id="dropdown-user"
+                >
+                  👤 {user.username}
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu align="end">
+                  <Dropdown.Item as={Link} to="/profile">
+                    👤 My Profile
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/orders">
+                    📦 My Orders
+                  </Dropdown.Item>
+                  <Dropdown.Item as={Link} to="/checkout">
+                    💳 Checkout
+                  </Dropdown.Item>
+                  <Dropdown.Divider />
+                  <Dropdown.Item onClick={handleLogout}>
+                    🔓 Logout
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <div className="d-flex gap-2">
+                <Button 
+                  as={Link} 
+                  to="/login" 
+                  variant="outline-light" 
+                  className="rounded-pill"
+                >
+                  🔑 Sign In
+                </Button>
+                <Button 
+                  as={Link} 
+                  to="/register" 
+                  variant="primary" 
+                  className="rounded-pill"
+                >
+                  📝 Sign Up
+                </Button>
+              </div>
+            )}
           </div>
         </Navbar.Collapse>
       </Container>
-
-      <style jsx="true">{`
-        .cursor-pointer {
-          cursor: pointer !important;
-        }
-        .hover-bg-light:hover {
-          background-color: rgba(0, 0, 0, 0.05) !important;
-        }
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .search-result-card {
-          transition: all 0.2s ease;
-        }
-        .search-result-card:hover {
-          transform: translateX(5px);
-          box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-      `}</style>
     </Navbar>
   );
 };

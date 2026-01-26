@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -35,7 +35,7 @@ const Footer = () => {
       <Container className="py-4">
         <Row>
           <Col lg={4} className="mb-4">
-            <h5 className="mb-3">FakeStore</h5>
+            <h5 className="mb-3">MyStore</h5>
             <p className="text-muted">
               Your one-stop shop for all your needs. 
               Quality products at affordable prices.
@@ -74,6 +74,11 @@ const Footer = () => {
                   Cart
                 </Link>
               </li>
+              <li className="mb-2">
+                <Link to="/profile" className="text-muted text-decoration-none">
+                  My Account
+                </Link>
+              </li>
             </ul>
           </Col>
 
@@ -81,24 +86,24 @@ const Footer = () => {
             <h6>Categories</h6>
             <ul className="list-unstyled">
               <li className="mb-2">
-                <a href="#" className="text-muted text-decoration-none">
+                <Link to="/products?category=electronics" className="text-muted text-decoration-none">
                   Electronics
-                </a>
+                </Link>
               </li>
               <li className="mb-2">
-                <a href="#" className="text-muted text-decoration-none">
+                <Link to="/products?category=jewelery" className="text-muted text-decoration-none">
                   Jewelry
-                </a>
+                </Link>
               </li>
               <li className="mb-2">
-                <a href="#" className="text-muted text-decoration-none">
+                <Link to="/products?category=men's clothing" className="text-muted text-decoration-none">
                   Men's Clothing
-                </a>
+                </Link>
               </li>
               <li className="mb-2">
-                <a href="#" className="text-muted text-decoration-none">
+                <Link to="/products?category=women's clothing" className="text-muted text-decoration-none">
                   Women's Clothing
-                </a>
+                </Link>
               </li>
             </ul>
           </Col>
@@ -108,16 +113,22 @@ const Footer = () => {
             <p className="text-muted small mb-3">
               Subscribe to get special offers and updates
             </p>
-            <div className="input-group">
-              <input
-                type="email"
-                className="form-control"
-                placeholder="Your email"
-              />
-              <button className="btn btn-primary" type="button">
-                Subscribe
-              </button>
-            </div>
+            <Form>
+              <div className="input-group mb-3">
+                <Form.Control
+                  type="email"
+                  placeholder="Your email"
+                  aria-label="Your email"
+                  className="rounded-0"
+                />
+                <Button variant="primary" className="rounded-0">
+                  Subscribe
+                </Button>
+              </div>
+            </Form>
+            <small className="text-muted">
+              By subscribing, you agree to our Privacy Policy
+            </small>
           </Col>
         </Row>
 
@@ -126,7 +137,7 @@ const Footer = () => {
         <Row className="text-center">
           <Col>
             <p className="text-muted small mb-0">
-              © {new Date().getFullYear()} FakeStore. All rights reserved.
+              © {new Date().getFullYear()} MyStore. All rights reserved.
               This is a demo store using FakeStore API.
             </p>
           </Col>
